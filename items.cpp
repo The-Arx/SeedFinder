@@ -540,6 +540,121 @@ enum class Item {
     ITEMS_END
 };
 
+bool ante1_tag(Item tag) {
+  switch (tag) {
+    case Item::Buffoon_Tag:
+    case Item::Ethereal_Tag:
+    case Item::Garbage_Tag:
+    case Item::Handy_Tag:
+    case Item::Meteor_Tag:
+    case Item::Negative_Tag:
+    case Item::Orbital_Tag:
+    case Item::Standard_Tag:
+    case Item::Top_up_Tag:
+      return false;
+    default:
+      return true;
+  }
+}
+
+constexpr std::array<Item, 22> TAROTS {
+    Item::The_Fool,
+    Item::The_Magician,
+    Item::The_High_Priestess,
+    Item::The_Empress,
+    Item::The_Emperor,
+    Item::The_Hierophant,
+    Item::The_Lovers,
+    Item::The_Chariot,
+    Item::Justice,
+    Item::The_Hermit,
+    Item::The_Wheel_of_Fortune,
+    Item::Strength,
+    Item::The_Hanged_Man,
+    Item::Death,
+    Item::Temperance,
+    Item::The_Devil,
+    Item::The_Tower,
+    Item::The_Star,
+    Item::The_Moon,
+    Item::The_Sun,
+    Item::Judgement,
+    Item::The_World
+};
+
+constexpr std::array<Item, 24> TAGS {
+    Item::Uncommon_Tag,
+    Item::Rare_Tag,
+    Item::Negative_Tag,
+    Item::Foil_Tag,
+    Item::Holographic_Tag,
+    Item::Polychrome_Tag,
+    Item::Investment_Tag,
+    Item::Voucher_Tag,
+    Item::Boss_Tag,
+    Item::Standard_Tag,
+    Item::Charm_Tag,
+    Item::Meteor_Tag,
+    Item::Buffoon_Tag,
+    Item::Handy_Tag,
+    Item::Garbage_Tag,
+    Item::Ethereal_Tag,
+    Item::Coupon_Tag,
+    Item::Double_Tag,
+    Item::Juggle_Tag,
+    Item::D6_Tag,
+    Item::Top_up_Tag,
+    Item::Speed_Tag,
+    Item::Orbital_Tag,
+    Item::Economy_Tag
+};
+
+constexpr std::array<Item, 28> BOSSES {
+    Item::The_Arm,
+    Item::The_Club,
+    Item::The_Eye,
+    Item::Amber_Acorn,
+    Item::Cerulean_Bell,
+    Item::Crimson_Heart,
+    Item::Verdant_Leaf,
+    Item::Violet_Vessel,
+    Item::The_Fish,
+    Item::The_Flint,
+    Item::The_Goad,
+    Item::The_Head,
+    Item::The_Hook,
+    Item::The_House,
+    Item::The_Manacle,
+    Item::The_Mark,
+    Item::The_Mouth,
+    Item::The_Needle,
+    Item::The_Ox,
+    Item::The_Pillar,
+    Item::The_Plant,
+    Item::The_Psychic,
+    Item::The_Serpent,
+    Item::The_Tooth,
+    Item::The_Wall,
+    Item::The_Water,
+    Item::The_Wheel,
+    Item::The_Window
+};
+
+constexpr std::array<Item, 12> POKER_HANDS {
+    Item::Flush_Five,
+    Item::Flush_House,
+    Item::Five_of_a_Kind,
+    Item::Straight_Flush,
+    Item::Four_of_a_Kind,
+    Item::Full_House,
+    Item::Flush,
+    Item::Straight,
+    Item::Three_of_a_Kind,
+    Item::Two_Pair,
+    Item::Pair,
+    Item::High_Card,
+};
+
 constexpr std::array<Item, 61> COMMON_JOKERS {
     Item::Joker,
     Item::Greedy_Joker,
