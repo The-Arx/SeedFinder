@@ -1,5 +1,4 @@
 #include <array>
-#include <iomanip>
 #include <iostream>
 #include <string>
 
@@ -63,6 +62,7 @@ has_soul:
 has_judgment:
   double blueprint_edition = seed.init_rand("edijud1").random();
   double perkeo_edition = seed.init_rand("edisou1").random();
+  if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96)
   std::cout << edition_str(blueprint_edition) << " "
             << edition_str(perkeo_edition) << " " << seed.seed << std::endl;
 }
@@ -70,17 +70,18 @@ has_judgment:
 const std::string chars = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const std::string next_chars = chars.substr(1) + chars[0];
 int main(int argc, char* argv[]) {
-  std::cout << std::setprecision(16);
   std::string seed_str;
   if (argc > 1) {
     seed_str = argv[1];
-    if (seed_str.size() != 8) {
-      std::cerr << "Seed must be exactly 8 characters, got " << seed_str.size() << std::endl;
+    if (seed_str.size() > 8) {
+      std::cerr << "Seed must be at most 8 characters, got " << seed_str.size() << std::endl;
       return -1;
     }
+    seed_str.insert(0, 8 - seed_str.size(), '1');
   } else {
     seed_str = "11111111";
   }
+  std::cerr << "Starting on seed " << seed_str << std::endl;
   std::array<int, 8> seed_num;
   for (int i = 0; i < 8; i++) {
     int index = chars.find(seed_str[i]);
