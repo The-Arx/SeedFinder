@@ -62,7 +62,7 @@ has_soul:
 has_judgment:
   double blueprint_edition = seed.init_rand("edijud1").random();
   double perkeo_edition = seed.init_rand("edisou1").random();
-  if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96)
+  if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
   std::cout << edition_str(blueprint_edition) << " "
             << edition_str(perkeo_edition) << " " << seed.seed << std::endl;
 }
