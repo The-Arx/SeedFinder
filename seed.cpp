@@ -1,6 +1,7 @@
 #pragma once
-#include <string>
 #include <cmath>
+#include <string>
+
 #include "prng.cpp"
 
 #define MATH_PI 3.14159265358979323846
@@ -14,16 +15,50 @@ double pseudohash(std::string string) {
   return num;
 }
 
-class Seed {
-  double hashed_seed;
+class RandGen {
+ public:
+  double random();
+  template <typename T>
+  T rand_item();
 
+ private:
+  double hashed_seed;
+  double state;
+  RandGen(double hashed_seed, double state);
+  double pseudoseed();
+
+  friend class Seed;
+};
+
+RandGen::RandGen(double hashed_seed, double state) {
+  this->hashed_seed = hashed_seed;
+  this->state = state;
+}
+
+double RandGen::pseudoseed() {
+  this->state =
+      std::round(std::fmod(2.134453429141 + this->state * 1.72431234, 1.0) *
+                 std::pow(10.0, 13.0)) /
+      std::pow(10.0, 13.0);
+  return (this->state + hashed_seed) / 2.0;
+}
+
+double RandGen::random() { return first_rand(this->pseudoseed()); }
+
+template <typename T>
+T RandGen::rand_item() {
+  return static_cast<T>(
+      static_cast<int>(this->random() * static_cast<int>(T::_Count)));
+}
+
+class Seed {
  public:
   std::string seed;
   Seed(std::string seed);
-  double init_rand(std::string key);
-  double pseudoseed(double &rand_seed);
-  double random(double &rand_seed);
-  template <typename T> T rand_item(double &rand_seed);
+  RandGen init_rand(std::string key);
+
+ private:
+  double hashed_seed;
 };
 
 Seed::Seed(std::string seed) {
@@ -31,21 +66,6 @@ Seed::Seed(std::string seed) {
   this->hashed_seed = pseudohash(seed);
 }
 
-double Seed::init_rand(std::string key) { return pseudohash(key + seed); }
-
-double Seed::pseudoseed(double &rand_seed) {
-  rand_seed =
-      std::round(std::fmod(2.134453429141 + rand_seed * 1.72431234, 1.0) *
-                 std::pow(10.0, 13.0)) /
-      std::pow(10.0, 13.0);
-  return (rand_seed + hashed_seed) / 2.0;
-}
-
-double Seed::random(double &rand_seed) {
-  return first_rand(pseudoseed(rand_seed));
-}
-
-template <typename T>
-T Seed::rand_item(double &rand_seed) {
-  return static_cast<T>(static_cast<int>(this->random(rand_seed) * static_cast<int>(T::_Count)));
+RandGen Seed::init_rand(std::string key) {
+  return RandGen(this->hashed_seed, pseudohash(key + seed));
 }
