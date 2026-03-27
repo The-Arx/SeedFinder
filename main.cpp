@@ -62,9 +62,9 @@ has_soul:
 has_judgment:
   double blueprint_edition = seed.init_rand("edijud1").random();
   double perkeo_edition = seed.init_rand("edisou1").random();
-  // if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
+  if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
   std::cout << edition_str(blueprint_edition) << " "
-            << edition_str(perkeo_edition) << " " << seed.seed << "\n";
+            << edition_str(perkeo_edition) << " " << seed.seed << std::endl;
 }
 
 const std::string chars = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -93,8 +93,8 @@ int main(int argc, char* argv[]) {
     }
     seed_num[i] = index;
   }
-  for (int i = 0; i < 10000000; i++) {
-    // while (true) {
+  // for (int i = 0; i < 10000000; i++) {
+  while (true) {
     perkeo_blueprint(Seed(seed_str));
     for (int j = 0; j < 8; j++) {
       seed_str[j] = next_chars[seed_num[j]];
