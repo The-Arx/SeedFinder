@@ -6,11 +6,22 @@
 
 #define MATH_PI 3.14159265358979323846
 
-double pseudohash(std::string string) {
+// WARNING: Won't work on bugged seeds
+inline double fast_mod_1(double x) { return x - static_cast<long>(x); }
+
+double pseudohash(std::string_view string) {
   double num = 1;
   for (int i = string.length(); i > 0; i--) {
-    num = std::fmod(
-        (1.1239285023 / num) * string[i - 1] * MATH_PI + MATH_PI * i, 1.0);
+    num = fast_mod_1((1.1239285023 / num) * string[i - 1] * MATH_PI +
+                     MATH_PI * i);
+  }
+  return num;
+}
+
+double pseudohash_partial(int offset, std::string_view string, double num) {
+  for (int i = string.length() - 1; i >= 0; i--) {
+    num = fast_mod_1((1.1239285023 / num) * string[i] * MATH_PI +
+                     MATH_PI * (i + offset + 1));
   }
   return num;
 }
@@ -48,24 +59,25 @@ double RandGen::random() { return first_rand(this->pseudoseed()); }
 template <typename T>
 T RandGen::rand_item() {
   return static_cast<T>(
-      static_cast<int>(this->random() * static_cast<int>(T::_Count)));
+      static_cast<int>(this->random() * static_cast<int>(T::Count)));
 }
 
 class Seed {
  public:
-  std::string seed;
-  Seed(std::string seed);
-  RandGen init_rand(std::string key);
+  const std::string seed;
+  Seed(const std::string &seed);
+  RandGen init_rand(std::string_view key);
 
  private:
   double hashed_seed;
 };
 
-Seed::Seed(std::string seed) {
-  this->seed = seed;
-  this->hashed_seed = pseudohash(seed);
-}
+Seed::Seed(const std::string &seed)
+    : seed(seed), hashed_seed(pseudohash(seed)) {}
 
-RandGen Seed::init_rand(std::string key) {
-  return RandGen(this->hashed_seed, pseudohash(key + seed));
+RandGen Seed::init_rand(std::string_view key) {
+  double initial_state =
+      pseudohash_partial(0, key, pseudohash_partial(key.size(), seed, 1.0));
+  // double initial_state = pseudohash(key + seed);
+  return RandGen(this->hashed_seed, initial_state);
 }

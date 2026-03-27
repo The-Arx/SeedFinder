@@ -25,7 +25,7 @@ enum class Tag {
   Speed,
   Orbital,
   Economy,
-  _Count
+  Count
 };
 
 enum class Tarot {
@@ -51,7 +51,7 @@ enum class Tarot {
   The_Sun,
   Judgement,
   The_World,
-  _Count
+  Count
 };
 
 enum class Common {
@@ -116,7 +116,7 @@ enum class Common {
   Swashbuckler,
   Hanging_Chad,
   Shoot_the_Moon,
-  _Count
+  Count
 };
 
 enum class Uncommon {
@@ -184,7 +184,7 @@ enum class Uncommon {
   Cartomancer,
   Astronomer,
   Bootstraps,
-  _Count
+  Count
 };
 
 enum class Rare {
@@ -208,8 +208,7 @@ enum class Rare {
   Brainstorm,
   Drivers_License,
   Burnt_Joker,
-  _Count
+  Count
 };
 
-constexpr int LEGENDARY_COUNT = 5;
-enum class Legendary { Canio, Triboulet, Yorick, Chicot, Perkeo, _Count };
+enum class Legendary { Canio, Triboulet, Yorick, Chicot, Perkeo, Count };
