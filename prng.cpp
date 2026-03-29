@@ -1,15 +1,6 @@
 #pragma once
 #include <cstdint>
 
-class PRNG {
-  uint64_t u[4];
-  uint64_t prng_u64();
-
- public:
-  void seed(double d);
-  double random();
-};
-
 #define TW223_GEN(rs, z, i, k, q, s)                 \
   z = rs[i];                                            \
   z = (((z << q) ^ z) >> (k - s)) ^                     \
