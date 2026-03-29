@@ -89,7 +89,7 @@ class Seed {
 
  private:
   std::array<char, SEED_LENGTH> seed;
-  std::array<int, SEED_LENGTH> seed_num;
+  std::array<unsigned int, SEED_LENGTH> seed_num;
   std::array<double, SEED_LENGTH + 1> hashed_seed;
   void partial_hash_seed(int start);
 };
