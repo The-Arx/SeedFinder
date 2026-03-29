@@ -23,7 +23,7 @@ void bluestorm_credit(Seed seed) {
   for (int i = 0; i < 2; i++) {
     if (rarity_buf.random() > 0.7) continue;  // uncommon or rare
     if (common_buf.rand_item<Common>() == Common::Credit_Card) {
-      std::cout << seed.seed << std::endl;
+      std::cout << seed.to_string() << std::endl;
       return;
     }
   }
@@ -62,46 +62,31 @@ has_soul:
 has_judgment:
   double blueprint_edition = seed.init_rand("edijud1").random();
   double perkeo_edition = seed.init_rand("edisou1").random();
-  if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
+  // if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
   std::cout << edition_str(blueprint_edition) << " "
-            << edition_str(perkeo_edition) << " " << seed.seed << std::endl;
+            << edition_str(perkeo_edition) << " " << seed.to_string() << std::endl;
 }
 
-const std::string chars = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-const std::string next_chars = chars.substr(1) + chars[0];
 int main(int argc, char* argv[]) {
   std::string seed_str;
   if (argc > 1) {
     seed_str = argv[1];
-    if (seed_str.size() > 8) {
+    if (seed_str.size() > SEED_LENGTH) {
       std::cerr << "Seed must be at most 8 characters, got " << seed_str.size()
                 << std::endl;
       return -1;
     }
-    seed_str.insert(0, 8 - seed_str.size(), '1');
   } else {
-    seed_str = "11111111";
+    seed_str = "";
   }
+  seed_str.insert(0, SEED_LENGTH - seed_str.size(), '1');
   std::cerr << "Starting on seed " << seed_str << std::endl;
-  std::array<int, 8> seed_num;
-  for (int i = 0; i < 8; i++) {
-    auto index = chars.find(seed_str[i]);
-    if (index == std::string::npos) {
-      std::cerr << "Unexpected character " << seed_str[i] << " in initial seed"
-                << std::endl;
-      return -1;
-    }
-    seed_num[i] = index;
-  }
-  // for (int i = 0; i < 10000000; i++) {
-  while (true) {
-    perkeo_blueprint(Seed(seed_str));
-    for (int j = 0; j < 8; j++) {
-      seed_str[j] = next_chars[seed_num[j]];
-      seed_num[j] += 1;
-      if (seed_num[j] != chars.length()) break;
-      seed_num[j] = 0;
-    }
+
+  Seed seed(seed_str);
+  for (int i = 0; i < 10000000; i++) {
+  // while (true) {
+    perkeo_blueprint(seed);
+    seed.next();
   }
   return 0;
 }

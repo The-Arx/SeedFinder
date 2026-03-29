@@ -1,13 +1,29 @@
 #pragma once
 #include <cmath>
+#include <cstdint>
+#include <iostream>
+#include <limits>
 #include <string>
 
 #include "prng.cpp"
 
-#define MATH_PI 3.14159265358979323846
+constexpr int SEED_LENGTH = 8;
+const std::string SEED_CHARS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const std::string NEXT_SEED_CHAR = SEED_CHARS.substr(1) + SEED_CHARS[0];
 
-// WARNING: Won't work on bugged seeds
-inline double fast_mod_1(double x) { return x - static_cast<long>(x); }
+constexpr double MATH_PI = 3.14159265358979323846;
+
+// x must be >= 0;
+inline double fast_mod_1(double x) {
+  // Won't work on bugged seeds
+  // return x - static_cast<long>(x);
+
+  // Works on all seeds but adds about 50ns per call
+  return (x - static_cast<long>(x)) * (x < std::numeric_limits<long>::max());
+
+  // Untested
+  return x - std::trunc(x);
+}
 
 double pseudohash(std::string_view string) {
   double num = 1;
@@ -64,20 +80,85 @@ T RandGen::rand_item() {
 
 class Seed {
  public:
-  const std::string seed;
-  Seed(const std::string &seed);
-  RandGen init_rand(std::string_view key);
+  Seed(std::string_view seed);
+  Seed(long seed);
+  RandGen init_rand(std::string_view key) const;
+  long to_long() const;
+  std::string_view to_string() const;
+  void next();
 
  private:
-  double hashed_seed;
+  std::array<char, SEED_LENGTH> seed;
+  std::array<int, SEED_LENGTH> seed_num;
+  std::array<double, SEED_LENGTH + 1> hashed_seed;
+  void partial_hash_seed(int start);
 };
 
-Seed::Seed(const std::string &seed)
-    : seed(seed), hashed_seed(pseudohash(seed)) {}
+Seed::Seed(std::string_view seed_str) {
+  if (seed_str.size() != SEED_LENGTH) {
+    throw std::runtime_error(std::string("Seed must be exactly ") +
+                             std::to_string(SEED_LENGTH) + " characters (was " +
+                             std::to_string(seed_str.size()) + ")");
+  }
+  for (int i = 0; i < SEED_LENGTH; i++) {
+    auto index = SEED_CHARS.find(seed_str[i]);
+    if (index == std::string::npos) {
+      throw std::runtime_error(std::string("Unexpected character ") +
+                               seed_str[i] + " in initial seed");
+    }
+    seed_num[i] = index;
+    seed[i] = seed_str[i];
+  }
+  hashed_seed[SEED_LENGTH] = 1.0;
+  partial_hash_seed(SEED_LENGTH - 1);
+}
 
-RandGen Seed::init_rand(std::string_view key) {
-  double initial_state =
-      pseudohash_partial(0, key, pseudohash_partial(key.size(), seed, 1.0));
+Seed::Seed(long seed_long) {
+  for (int i = 0; i < SEED_LENGTH; i++) {
+    int index = seed_long % 35;
+    seed_long /= 35;
+    seed_num[i] = index;
+    seed[i] = SEED_CHARS[index];
+  }
+  hashed_seed[SEED_LENGTH] = 1.0;
+  partial_hash_seed(SEED_LENGTH - 1);
+}
+
+std::string_view Seed::to_string() const {
+  return std::string_view(seed.data(), seed.size());
+}
+
+std::ostream &operator<<(std::ostream &os, const Seed &seed) {
+  os << "Seed(" << seed.to_string() << ")";
+  return os;
+}
+
+void Seed::partial_hash_seed(int start) {
+  double num = hashed_seed[start + 1];
+  for (int i = start; i >= 0; i--) {
+    num = fast_mod_1((1.1239285023 / num) * seed[i] * MATH_PI +
+                     MATH_PI * (i + 1));
+    hashed_seed[i] = num;
+  }
+}
+
+void Seed::next() {
+  for (int i = 0; i < 8; i++) {
+    seed[i] = NEXT_SEED_CHAR[seed_num[i]];
+    seed_num[i] += 1;
+    if (seed_num[i] != SEED_CHARS.length()) {
+      partial_hash_seed(i);
+      break;
+    }
+    seed_num[i] = 0;
+  }
+}
+
+RandGen Seed::init_rand(std::string_view key) const {
+  double initial_state = pseudohash_partial(
+      0, key,
+      pseudohash_partial(key.size(), std::string_view(seed.data(), seed.size()),
+                         1.0));
   // double initial_state = pseudohash(key + seed);
-  return RandGen(this->hashed_seed, initial_state);
+  return RandGen(this->hashed_seed[0], initial_state);
 }
