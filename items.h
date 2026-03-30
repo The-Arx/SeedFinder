@@ -1,5 +1,61 @@
 #pragma once
 
+enum class DeckOrder {
+  C_2,
+  C_3,
+  C_4,
+  C_5,
+  C_6,
+  C_7,
+  C_8,
+  C_9,
+  C_A,
+  C_J,
+  C_K,
+  C_Q,
+  C_T,
+  D_2,
+  D_3,
+  D_4,
+  D_5,
+  D_6,
+  D_7,
+  D_8,
+  D_9,
+  D_A,
+  D_J,
+  D_K,
+  D_Q,
+  D_T,
+  H_2,
+  H_3,
+  H_4,
+  H_5,
+  H_6,
+  H_7,
+  H_8,
+  H_9,
+  H_A,
+  H_J,
+  H_K,
+  H_Q,
+  H_T,
+  S_2,
+  S_3,
+  S_4,
+  S_5,
+  S_6,
+  S_7,
+  S_8,
+  S_9,
+  S_A,
+  S_J,
+  S_K,
+  S_Q,
+  S_T,
+  Count
+};
+
 enum class Tag {
   Uncommon,
   Rare,
@@ -28,6 +84,22 @@ enum class Tag {
   Count
 };
 
+enum class Planet {
+  Mercury,
+  Venus,
+  Earth,
+  Mars,
+  Jupiter,
+  Saturn,
+  Uranus,
+  Neptune,
+  Pluto,
+  Planet_X,
+  Ceres,
+  Eris,
+  Count
+};
+
 enum class Tarot {
   The_Fool,
   The_Magician,
@@ -52,6 +124,113 @@ enum class Tarot {
   Judgement,
   The_World,
   Count
+};
+
+enum class Boss {
+  The_Arm,
+  The_Club,
+  The_Eye,
+  Amber_Acorn,
+  Cerulean_Bell,
+  Crimson_Heart,
+  Verdant_Leaf,
+  Violet_Vessel,
+  The_Fish,
+  The_Flint,
+  The_Goad,
+  The_Head,
+  The_Hook,
+  The_House,
+  The_Manacle,
+  The_Mark,
+  The_Mouth,
+  The_Needle,
+  The_Ox,
+  The_Pillar,
+  The_Plant,
+  The_Psychic,
+  The_Serpent,
+  The_Tooth,
+  The_Wall,
+  The_Water,
+  The_Wheel,
+  The_Window,
+  Count
+};
+
+enum class PokerHand {
+  Flush_Five,
+  Flush_House,
+  Five_of_a_Kind,
+  Straight_Flush,
+  Four_of_a_Kind,
+  Full_House,
+  Flush,
+  Straight,
+  Three_of_a_Kind,
+  Two_Pair,
+  Pair,
+  High_Card,
+  Count
+};
+
+enum class Voucher {
+  Overstock,
+  Overstock_Plus,
+  Clearance_Sale,
+  Liquidation,
+  Hone,
+  Glow_Up,
+  Reroll_Surplus,
+  Reroll_Glut,
+  Crystal_Ball,
+  Omen_Globe,
+  Telescope,
+  Observatory,
+  Grabber,
+  Nacho_Tong,
+  Wasteful,
+  Recyclomancy,
+  Tarot_Merchant,
+  Tarot_Tycoon,
+  Planet_Merchant,
+  Planet_Tycoon,
+  Seed_Money,
+  Money_Tree,
+  Blank,
+  Antimatter,
+  Magic_Trick,
+  Illusion,
+  Hieroglyph,
+  Petroglyph,
+  Directors_Cut,
+  Retcon,
+  Paint_Brush,
+  Palette,
+  Count
+};
+
+enum class Spectral {
+    Familiar,
+    Grim,
+    Incantation,
+    Talisman,
+    Aura,
+    Wraith,
+    Sigil,
+    Ouija,
+    Ectoplasm,
+    Immolate,
+    Ankh,
+    Deja_Vu,
+    Hex,
+    Trance,
+    Medium,
+    Cryptid,
+    // Always retry
+    Soul,
+    Black_Hole,
+    Count
 };
 
 enum class Common {
