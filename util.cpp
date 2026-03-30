@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "items.cpp"
+#include "items.h"
 
 bool ante1_tag(Tag tag) {
   switch (tag) {

@@ -8,35 +8,33 @@
 
 #include "prng.cpp"
 
-constexpr long pow_int(long a, int b) {
+constexpr inline long pow_int(long a, int b) {
   long out = 1;
-  while (b) {
-    if (b & 1) {
-      out *= a;
-    }
+  while (b > 0) {
+    if (b & 1) out *= a;
     b >>= 1;
-    a *= a;
+    if (b > 0) a *= a;
   }
   return out;
 }
 
 constexpr int SEED_LENGTH = 8;
-const std::string SEED_CHARS = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
+const std::string SEED_CHARS = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const std::string NEXT_SEED_CHAR = SEED_CHARS.substr(1) + SEED_CHARS[0];
 const long NUM_SEEDS = pow_int(SEED_CHARS.length(), SEED_LENGTH);
 
 constexpr double MATH_PI = 3.14159265358979323846;
 
 // x must be >= 0;
-inline double fast_mod_1(double x) {
+static double fast_mod_1(double x) {
   // Won't work on bugged seeds
   // return x - static_cast<long>(x);
 
   // Works on all seeds but adds about 50ns per call
   return (x - static_cast<long>(x)) * (x < std::numeric_limits<long>::max());
 
-  // Untested
-  return x - std::trunc(x);
+  // Slower
+  // return x - std::trunc(x);
 }
 
 double pseudohash(std::string_view string) {
@@ -48,7 +46,7 @@ double pseudohash(std::string_view string) {
   return num;
 }
 
-inline double pseudohash_partial(int offset, std::string_view string, double num) {
+static double pseudohash_partial(int offset, std::string_view string, double num) {
   for (int i = string.length() - 1; i >= 0; i--) {
     num = fast_mod_1((1.1239285023 / num) * string[i] * MATH_PI +
                      MATH_PI * (i + offset + 1));
@@ -129,8 +127,8 @@ Seed::Seed(std::string_view seed_str) {
 
 Seed::Seed(long seed_long) {
   for (int i = 0; i < SEED_LENGTH; i++) {
-    int index = seed_long % 35;
-    seed_long /= 35;
+    int index = seed_long % SEED_CHARS.length();
+    seed_long /= SEED_CHARS.length();
     seed_num[i] = index;
     seed[i] = SEED_CHARS[index];
   }
