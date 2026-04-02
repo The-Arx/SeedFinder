@@ -2,7 +2,7 @@
 #include "seed.cpp"
 #include "util.cpp"
 
-void bluestorm_credit(Seed seed) {
+void bluestorm_credit(const Seed &seed) {
   RandGen rarity_sho = seed.init_rand("rarity1sho");
   if (rarity_sho.random() <= 0.95) return;
   if (rarity_sho.random() <= 0.95) return;
@@ -26,7 +26,7 @@ void bluestorm_credit(Seed seed) {
   return;
 }
 
-void perkeo_blueprint(Seed seed) {
+void perkeo_blueprint(const Seed &seed) {
   RandGen rarity_jud = seed.init_rand("rarity1jud");
   if (rarity_jud.random() <= 0.95) return;
   RandGen rare_jud = seed.init_rand("Joker3jud1");
@@ -63,3 +63,45 @@ has_judgment:
             << edition_str(perkeo_edition) << " " << seed.to_string()
             << std::endl;
 }
+
+void ante1_cavendish(const Seed &seed) {
+    RandGen cavendish = seed.init_rand("cavendish");
+    if (cavendish.random() >= 1.0 / 1000) return;
+    RandGen gros_michel = seed.init_rand("gros_michel");
+    if (gros_michel.random() >= 1.0 / 6) return;
+
+    RandGen shop_item = seed.init_rand("cdt1");
+    RandGen shop_edition = seed.init_rand("edisho1");
+    RandGen shop_rarity = seed.init_rand("rarity1sho");
+    RandGen shop_common = seed.init_rand("Joker1sho1");
+
+    bool has_michel = false;
+    double michel_edition;
+    for (int i = 0; i < 2; i++) {
+      if (shop_item.random() * 28 > 20) continue;
+      // if (shop_item.random() * 30 > 20) return; // ghost deck
+      double edition = shop_edition.random();
+      if (shop_rarity.random() > 0.7) continue;
+      if (shop_common.rand_item<Common>() != Common::Gros_Michel) continue;
+      if (has_michel) continue;
+      has_michel = true;
+      michel_edition = edition;
+    }
+    if (!has_michel) return;
+
+    bool has_cavendish = false;
+    double cavendish_edition;
+    for (int i = 0; i < 2; i++) {
+      if (shop_item.random() * 28 > 20) continue;
+      double edition = shop_edition.random();
+      if (shop_rarity.random() > 0.7) continue;
+      if (shop_common.rand_item<Common>() != Common::Cavendish) continue;
+      if (has_cavendish) continue;
+      has_cavendish = true;
+      cavendish_edition = edition;
+    }
+    if (!has_cavendish) return;
+
+    std::cout << seed << " " << edition_str(michel_edition) << " " << edition_str(cavendish_edition) << std::endl;
+}
+

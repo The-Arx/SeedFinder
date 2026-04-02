@@ -21,9 +21,9 @@ int main(int argc, char* argv[]) {
   std::cerr << "Starting on seed " << seed_str << std::endl;
 
   Seed seed(seed_str);
-  for (int i = 0; i < 10000000; i++) {
-  // while (true) {
-    perkeo_blueprint(seed);
+  // for (int i = 0; i < 10000000; i++) {
+  while (true) {
+    ante1_cavendish(seed);
     seed.next();
   }
   return 0;
