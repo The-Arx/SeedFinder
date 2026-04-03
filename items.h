@@ -1,5 +1,24 @@
 #pragma once
 
+enum class Pack {
+  Arcana_Normal,
+  Arcana_Jumbo,
+  Arcana_Mega,
+  Celestial_Normal,
+  Celestial_Jumbo,
+  Celestial_Mega,
+  Spectral_Normal,
+  Spectral_Jumbo,
+  Spectral_Mega,
+  Standard_Normal,
+  Standard_Jumbo,
+  Standard_Mega,
+  Buffoon_Normal,
+  Buffoon_Jumbo,
+  Buffoon_Mega,
+  Count,
+};
+
 enum class DeckOrder {
   C_2,
   C_3,

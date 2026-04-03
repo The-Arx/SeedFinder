@@ -30,10 +30,10 @@ static double fast_mod_1(double x) {
   // Won't work on bugged seeds
   // return x - static_cast<long>(x);
 
-  // Works on all seeds but adds about 50ns per call
+  // Works on all seeds but a bit slower
   return (x - static_cast<long>(x)) * (x < std::numeric_limits<long>::max());
 
-  // Slower
+  // Slower on the cpu
   // return x - std::trunc(x);
 }
 
@@ -59,6 +59,7 @@ class RandGen {
   double random();
   template <typename T>
   T rand_item();
+  bool is_bugged();
 
  private:
   double hashed_seed;
@@ -88,6 +89,10 @@ template <typename T>
 T RandGen::rand_item() {
   return static_cast<T>(
       static_cast<int>(this->random() * static_cast<int>(T::Count)));
+}
+
+bool RandGen::is_bugged() {
+  return std::isnan(this->state);
 }
 
 class Seed {

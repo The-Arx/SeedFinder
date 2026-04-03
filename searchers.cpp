@@ -76,7 +76,7 @@ void ante1_cavendish(const Seed &seed) {
     RandGen shop_common = seed.init_rand("Joker1sho1");
 
     bool has_michel = false;
-    double michel_edition;
+    double michel_edition = 0.0;
     for (int i = 0; i < 2; i++) {
       if (shop_item.random() * 28 > 20) continue;
       // if (shop_item.random() * 30 > 20) return; // ghost deck
@@ -90,7 +90,7 @@ void ante1_cavendish(const Seed &seed) {
     if (!has_michel) return;
 
     bool has_cavendish = false;
-    double cavendish_edition;
+    double cavendish_edition = 0.0;
     for (int i = 0; i < 2; i++) {
       if (shop_item.random() * 28 > 20) continue;
       double edition = shop_edition.random();
@@ -104,4 +104,12 @@ void ante1_cavendish(const Seed &seed) {
 
     std::cout << seed << " " << edition_str(michel_edition) << " " << edition_str(cavendish_edition) << std::endl;
 }
+
+void bugged_seeds(const Seed &seed) {
+  RandGen rand = seed.init_rand("erratic");
+  if (rand.is_bugged()) {
+    std::cout << seed << std::endl;
+  }
+}
+
 
