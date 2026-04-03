@@ -36,6 +36,7 @@ constexpr double PACK_WEIGHT_TOTAL =
     std::accumulate(PACK_WEIGHTS.begin(), PACK_WEIGHTS.end(), 0.0);
 
 Pack pack_from_rand(double rand) {
+  rand *= PACK_WEIGHT_TOTAL;
   double total = 0;
   for (unsigned int i = 0; i < PACK_WEIGHTS.size(); i++) {
     total += PACK_WEIGHTS[i];

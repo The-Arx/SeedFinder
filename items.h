@@ -1,5 +1,36 @@
 #pragma once
 
+enum class Enhancement {
+  None = -1,
+  Bonus,
+  Mult,
+  Wild,
+  Glass,
+  Steel,
+  Stone,
+  Gold,
+  Lucky,
+  Count
+};
+
+enum class Seal {
+  None = -1,
+  Gold,
+  Red,
+  Blue,
+  Purple,
+  Count
+};
+
+enum class Edition {
+  Base = -1,
+  Foil,
+  Holographic,
+  Polychrome,
+  Negative,
+  Count
+};
+
 enum class Pack {
   Arcana_Normal,
   Arcana_Jumbo,
@@ -19,7 +50,7 @@ enum class Pack {
   Count,
 };
 
-enum class DeckOrder {
+enum class Card {
   C_2,
   C_3,
   C_4,
