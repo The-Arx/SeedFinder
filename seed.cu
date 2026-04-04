@@ -1,10 +1,12 @@
 #pragma once
 #include <cuda_runtime.h>
 #include <limits.h>
+#include <utility>
 
 #include "prng.cu"
+#include "pseudohash.cu"
 
-constexpr static long pow_int(long a, int b) {
+constexpr long pow_int(long a, int b) {
   long out = 1;
   while (b > 0) {
     if (b & 1) out *= a;
@@ -15,24 +17,9 @@ constexpr static long pow_int(long a, int b) {
 }
 
 constexpr int SEED_LENGTH = 8;
-__constant__ char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNPQRSTUVWXYZ";
+__constant__ char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
 constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
-
-constexpr double MATH_PI = 3.14159265358979323846;
-
-// x must be >= 0;
-__device__ static double fast_mod_1(double x) {
-  return x - trunc(x);
-}
-
-__device__ static double pseudohash_partial(int offset, int string_len, const char* string, double num) {
-  for (int i = string_len - 1; i >= 0; i--) {
-    num = fast_mod_1((1.1239285023 / num) * string[i] * MATH_PI +
-                     MATH_PI * (i + offset + 1));
-  }
-  return num;
-}
 
 class RandGen {
  public:
@@ -73,7 +60,8 @@ class Seed {
  public:
   char seed[SEED_LENGTH + 1];
   __device__ Seed(long seed);
-  __device__ RandGen init_rand(int key_len, const char* key) const;
+  template <typename... Args>
+  __device__ RandGen init_rand(Args&& ...args) const;
   __device__ long to_long() const;
   __device__ void next();
 
@@ -126,9 +114,8 @@ __device__ void Seed::next() {
   }
 }
 
-__device__ RandGen Seed::init_rand(int key_len, const char* key) const {
-  double initial_state = pseudohash_partial(0, key_len, key,
-      pseudohash_partial(key_len, SEED_LENGTH, seed,
-                         1.0));
+template <typename... Args>
+__device__ RandGen Seed::init_rand(Args&& ...args) const {
+  double initial_state = pseudohash(std::forward<Args>(args)..., this->seed);
   return RandGen(this->hashed_seed[0], initial_state);
 }
