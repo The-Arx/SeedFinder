@@ -1,6 +1,7 @@
 #pragma once
 #include <numeric>
 #include <string>
+#include <array>
 
 #include "items.h"
 
@@ -46,14 +47,6 @@ Pack pack_from_rand(double rand) {
   }
   return static_cast<Pack>(PACK_WEIGHTS.size() - 1);
 }
-
-enum class PackType {
-  Arcana,
-  Celestial,
-  Spectral,
-  Standard,
-  Buffoon,
-};
 
 PackType pack_type(Pack pack) {
   return static_cast<PackType>(static_cast<int>(pack) / 3);

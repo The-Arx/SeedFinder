@@ -24,6 +24,7 @@ constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
 class RandGen {
  public:
   __device__ double random();
+  __device__ void skip();
   template <typename T>
   __device__ T rand_item();
 
@@ -46,6 +47,10 @@ __device__ double RandGen::pseudoseed() {
     fast_mod_1(2.134453429141 + this->state * 1.72431234)
     * pow(10.0, 13.0)) / pow(10.0, 13.0);
   return (this->state + hashed_seed) / 2.0;
+}
+
+__device__ void RandGen::skip() {
+  this->pseudoseed();
 }
 
 __device__ double RandGen::random() { return first_rand(this->pseudoseed()); }

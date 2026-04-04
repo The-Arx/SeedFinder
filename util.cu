@@ -40,13 +40,11 @@ __device__ Pack pack_from_rand(double rand) {
   return static_cast<Pack>(PACK_WEIGHTS_LEN - 1);
 }
 
-enum class PackType {
-  Arcana,
-  Celestial,
-  Spectral,
-  Standard,
-  Buffoon,
-};
+__device__ Rarity rarity_from_rand(double rand) {
+  if (rand <= 0.7) return Rarity::Common;
+  if (rand <= 0.95) return Rarity::Uncommon;
+  return Rarity::Rare;
+}
 
 __device__ PackType pack_type(Pack pack) {
   return static_cast<PackType>(static_cast<int>(pack) / 3);

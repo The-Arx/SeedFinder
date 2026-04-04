@@ -1,5 +1,12 @@
 #pragma once
 
+enum class Rarity {
+  Common,
+  Uncommon,
+  Rare,
+  Legendary,
+};
+
 enum class Enhancement {
   None = -1,
   Bonus,
@@ -28,6 +35,15 @@ enum class Edition {
   Holographic,
   Polychrome,
   Negative,
+  Count
+};
+
+enum class PackType {
+  Arcana,
+  Celestial,
+  Spectral,
+  Standard,
+  Buffoon,
   Count
 };
 

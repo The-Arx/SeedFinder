@@ -126,6 +126,59 @@ has_dna:
   return false;
 }
 
+__device__ bool quad_soul(const Seed &seed) {
+  RandGen soul_rand = seed.init_rand("soul_Tarot1");
+  int non_soul = 0;
+  for (int i = 0; i < 5; i++) {
+    if (soul_rand.random() <= 0.997 && ++non_soul > 1) {
+      return false;
+    }
+  }
+  
+  RandGen tag_rand = seed.init_rand("Tag1");
+  Tag first = tag_rand.rand_item<Tag>();
+  Tag second = tag_rand.rand_item<Tag>();
+  for (int i = 2; !ante1_tag(second); i++) {
+    RandGen tag_resample = seed.init_rand("Tag1_resample", i);
+    if (!ante1_tag(first)) first = tag_resample.rand_item<Tag>();
+    second = tag_resample.rand_item<Tag>();
+  }
+  if (second != Tag::Charm) return false;
+
+
+  RandGen shop_item = seed.init_rand("cdt1");
+  RandGen shop_rarity = seed.init_rand("rarity1sho");
+  RandGen shop_uncommon = seed.init_rand("Joker2sho1");
+  for (int i = 0; i < 2; i++) {
+    if (shop_item.random() * 28 > 20) continue;
+    // if (shop_item.random() * 30 > 20) return; // ghost deck
+    if (rarity_from_rand(shop_rarity.random()) != Rarity::Uncommon) continue;
+    if (shop_uncommon.rand_item<Uncommon>() != Uncommon::Showman) continue;
+    return true;
+  }
+
+  RandGen buf_rarity = seed.init_rand("rarity1buf");
+  RandGen buf_uncommon = seed.init_rand("Joker2buf1");
+  for (int i = 0; i < 2; i++) {
+    if (rarity_from_rand(buf_rarity.random()) != Rarity::Uncommon) continue;
+    if (buf_uncommon.rand_item<Uncommon>() != Uncommon::Showman) continue;
+    return true;
+  }
+
+  RandGen pack_rand = seed.init_rand("shop_pack1");
+  Pack pack = pack_from_rand(pack_rand.random());
+  if (pack_type(pack) == PackType::Buffoon) {
+    int size = pack_size(pack);
+    for (int i = 0; i < size; i++) {
+      if (rarity_from_rand(buf_rarity.random()) != Rarity::Uncommon) continue;
+      if (buf_uncommon.rand_item<Uncommon>() != Uncommon::Showman) continue;
+      return true;
+    }
+  }
+
+  return false;
+}
+
 __global__ void search_seeds() {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int totalThreads = gridDim.x * blockDim.x;
@@ -134,7 +187,7 @@ __global__ void search_seeds() {
     long end_seed = total * (tid + 1) / totalThreads;
     Seed seed(start_seed);
     for (long i = start_seed; i < end_seed; i++) {
-        if (trib_dna_poly(seed)) {
+        if (quad_soul(seed)) {
             printf("%s\n", seed.seed);
         }
         seed.next();
