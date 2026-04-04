@@ -4,6 +4,7 @@
 
 #include "items.h"
 #include "seed.cu"
+#include "util.cu"
 
 __device__ bool find_negatives(const Seed &seed) {
     RandGen shop_edition = seed.init_rand("edisho1");
@@ -70,6 +71,61 @@ __device__ bool ante1_cavendish(const Seed &seed) {
     return false;
 }
 
+__device__ bool trib_dna_poly(const Seed &seed) {
+  RandGen soul_rand = seed.init_rand("soul_Tarot1");
+  for (int i = 0; i < 5; i++) {
+    if (soul_rand.random() > 0.997) {
+      goto has_soul;
+    }
+  }
+  return false;
+has_soul:
+
+  RandGen pack_rand = seed.init_rand("shop_pack1");
+  if (pack_from_rand(pack_rand.random()) != Pack::Standard_Normal) return false;
+  RandGen legendary = seed.init_rand("Joker4");
+  if (legendary.rand_item<Legendary>() != Legendary::Triboulet) return false;
+  
+  RandGen rarity_buf = seed.init_rand("rarity1buf");
+  RandGen rare_buf = seed.init_rand("Joker3buf1");
+  for (int i = 0; i < 2; i++) {
+    if (rarity_buf.random() <= 0.95) continue;
+    if (rare_buf.rand_item<Rare>() != Rare::DNA) continue;
+    goto has_dna;
+  }
+  return false;
+has_dna:
+
+  RandGen tag_rand = seed.init_rand("Tag1");
+  Tag tag = tag_rand.rand_item<Tag>();
+  for (int i = 2; !ante1_tag(tag); i++) {
+    tag = seed.init_rand("Tag1_resample", i).rand_item<Tag>();
+  }
+  if (tag != Tag::Charm) return false;
+
+  RandGen card_rand = seed.init_rand("frontsta1");
+  RandGen edition_rand = seed.init_rand("standard_edition1");
+  RandGen has_enhancment_rand = seed.init_rand("stdset1");
+  RandGen enhancment_rand = seed.init_rand("Enhancedsta1");
+  RandGen has_seal_rand = seed.init_rand("stdseal1");
+  RandGen seal_type_rand = seed.init_rand("stdsealtype1");
+  for (int i = 0; i < 3; i++) {
+    Card card = card_rand.rand_item<Card>();
+    bool polychrome = edition_rand.random() > 1 - 0.006 * 2;
+    bool red_seal =
+        has_seal_rand.random() > 1 - 0.02 * 10 && seal_type_rand.random() > 0.75;
+    Enhancement enhancment = has_enhancment_rand.random() > 0.6
+                                 ? enhancment_rand.rand_item<Enhancement>()
+                                 : Enhancement::None;
+    if (card_rank(card) == Rank::King  && polychrome && red_seal &&
+        enhancment == Enhancement::Lucky) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 __global__ void search_seeds() {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int totalThreads = gridDim.x * blockDim.x;
@@ -78,7 +134,7 @@ __global__ void search_seeds() {
     long end_seed = total * (tid + 1) / totalThreads;
     Seed seed(start_seed);
     for (long i = start_seed; i < end_seed; i++) {
-        if (find_negatives(seed)) {
+        if (trib_dna_poly(seed)) {
             printf("%s\n", seed.seed);
         }
         seed.next();
@@ -86,7 +142,7 @@ __global__ void search_seeds() {
 }
 
 int main() {
-    search_seeds<<<160,256>>>();
+    search_seeds<<<1024,256>>>();
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {

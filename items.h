@@ -50,6 +50,31 @@ enum class Pack {
   Count,
 };
 
+enum class Suit {
+  Club,
+  Diamond,
+  Heart,
+  Spade,
+  Count
+};
+
+enum class Rank {
+  Two,
+  Three,
+  Four,
+  Five,
+  Six,
+  Seven,
+  Eight,
+  Nine,
+  Ace,
+  Jack,
+  King,
+  Queen,
+  Ten,
+  Count
+};
+
 enum class Card {
   C_2,
   C_3,
