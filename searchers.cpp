@@ -65,44 +65,98 @@ has_judgment:
 }
 
 void ante1_cavendish(const Seed &seed) {
-    RandGen cavendish = seed.init_rand("cavendish");
-    if (cavendish.random() >= 1.0 / 1000) return;
-    RandGen gros_michel = seed.init_rand("gros_michel");
-    if (gros_michel.random() >= 1.0 / 6) return;
+  RandGen cavendish = seed.init_rand("cavendish");
+  if (cavendish.random() >= 1.0 / 1000) return;
+  RandGen gros_michel = seed.init_rand("gros_michel");
+  if (gros_michel.random() >= 1.0 / 6) return;
 
-    RandGen shop_item = seed.init_rand("cdt1");
-    RandGen shop_edition = seed.init_rand("edisho1");
-    RandGen shop_rarity = seed.init_rand("rarity1sho");
-    RandGen shop_common = seed.init_rand("Joker1sho1");
+  RandGen shop_item = seed.init_rand("cdt1");
+  RandGen shop_edition = seed.init_rand("edisho1");
+  RandGen shop_rarity = seed.init_rand("rarity1sho");
+  RandGen shop_common = seed.init_rand("Joker1sho1");
 
-    bool has_michel = false;
-    double michel_edition = 0.0;
-    for (int i = 0; i < 2; i++) {
-      if (shop_item.random() * 28 > 20) continue;
-      // if (shop_item.random() * 30 > 20) return; // ghost deck
-      double edition = shop_edition.random();
-      if (shop_rarity.random() > 0.7) continue;
-      if (shop_common.rand_item<Common>() != Common::Gros_Michel) continue;
-      if (has_michel) continue;
-      has_michel = true;
-      michel_edition = edition;
+  bool has_michel = false;
+  double michel_edition = 0.0;
+  for (int i = 0; i < 2; i++) {
+    if (shop_item.random() * 28 > 20) continue;
+    // if (shop_item.random() * 30 > 20) return; // ghost deck
+    double edition = shop_edition.random();
+    if (shop_rarity.random() > 0.7) continue;
+    if (shop_common.rand_item<Common>() != Common::Gros_Michel) continue;
+    if (has_michel) continue;
+    has_michel = true;
+    michel_edition = edition;
+  }
+  if (!has_michel) return;
+
+  bool has_cavendish = false;
+  double cavendish_edition = 0.0;
+  for (int i = 0; i < 2; i++) {
+    if (shop_item.random() * 28 > 20) continue;
+    double edition = shop_edition.random();
+    if (shop_rarity.random() > 0.7) continue;
+    if (shop_common.rand_item<Common>() != Common::Cavendish) continue;
+    if (has_cavendish) continue;
+    has_cavendish = true;
+    cavendish_edition = edition;
+  }
+  if (!has_cavendish) return;
+
+  std::cout << seed << " " << edition_str(michel_edition) << " "
+            << edition_str(cavendish_edition) << std::endl;
+}
+
+void card_search(const Seed &seed) {
+  RandGen pack_rand = seed.init_rand("shop_pack1");
+  Pack pack = pack_from_rand(pack_rand.random());
+  if (pack_type(pack) != PackType::Standard) return;
+  int size = pack_size(pack);
+
+  std::array<bool, 5> matches;
+  int largest_card_match = -1;
+  RandGen card_rand = seed.init_rand("frontsta1");
+  for (int i = 0; i < size; i++) {
+    matches[i] = card_rand.rand_item<Card>() == Card::S_K;
+    if (matches[i]) {
+      largest_card_match = i;
     }
-    if (!has_michel) return;
+  }
+  if (largest_card_match < 0) return;
 
-    bool has_cavendish = false;
-    double cavendish_edition = 0.0;
-    for (int i = 0; i < 2; i++) {
-      if (shop_item.random() * 28 > 20) continue;
-      double edition = shop_edition.random();
-      if (shop_rarity.random() > 0.7) continue;
-      if (shop_common.rand_item<Common>() != Common::Cavendish) continue;
-      if (has_cavendish) continue;
-      has_cavendish = true;
-      cavendish_edition = edition;
+  int largest_edition_match = -1;
+  RandGen edition_rand = seed.init_rand("standard_edition1");
+  for (int i = 0; i <= largest_card_match; i++) {
+    double edition = edition_rand.random();
+    if (matches[i]) {
+      if (edition > 1 - 0.006 * 2) {
+        largest_edition_match = i;
+      } else {
+        matches[i] = false;
+      }
     }
-    if (!has_cavendish) return;
+  }
+  if (largest_edition_match < 0) return;
 
-    std::cout << seed << " " << edition_str(michel_edition) << " " << edition_str(cavendish_edition) << std::endl;
+
+  // RandGen card_rand = seed.init_rand("frontsta1");
+  // RandGen edition_rand = seed.init_rand("standard_edition1");
+  RandGen has_enhancment_rand = seed.init_rand("stdset1");
+  RandGen enhancment_rand = seed.init_rand("Enhancedsta1");
+  RandGen has_seal_rand = seed.init_rand("stdseal1");
+  RandGen seal_type_rand = seed.init_rand("stdsealtype1");
+  for (int i = 0; i <= largest_edition_match; i++) {
+    // Card card = card_rand.rand_item<Card>();
+    // bool polychrome = edition_rand.random() > 1 - 0.006 * 2;
+    bool red_seal =
+        has_seal_rand.random() > 1 - 0.02 * 10 && seal_type_rand.random() > 0.75;
+    Enhancement enhancment = has_enhancment_rand.random() > 0.6
+                                 ? enhancment_rand.rand_item<Enhancement>()
+                                 : Enhancement::None;
+    if (matches[i] /* &&  card == Card::S_K  && polychrome */ && red_seal &&
+        enhancment == Enhancement::Glass) {
+      std::cout << seed << std::endl;
+    }
+  }
 }
 
 void bugged_seeds(const Seed &seed) {
@@ -111,5 +165,3 @@ void bugged_seeds(const Seed &seed) {
     std::cout << seed << std::endl;
   }
 }
-
-
