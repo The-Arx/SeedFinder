@@ -26,6 +26,49 @@ __device__ bool negative_bluestorm(const Seed &seed) {
     return true;
 }
 
+__device__ bool ante1_cavendish(const Seed &seed) {
+    RandGen cavendish = seed.init_rand(9, "cavendish");
+    if (cavendish.random() >= 1.0 / 1000) return false;
+    if (cavendish.random() >= 1.0 / 1000) return false;
+    RandGen gros_michel = seed.init_rand(11, "gros_michel");
+    if (gros_michel.random() >= 1.0 / 6) return false;
+
+    RandGen shop_item = seed.init_rand(4, "cdt1");
+    RandGen shop_rarity = seed.init_rand(10, "rarity1sho");
+    RandGen shop_common = seed.init_rand(10, "Joker1sho1");
+
+    bool has_michel = false;
+    for (int i = 0; i < 2; i++) {
+      if (shop_item.random() * 28 > 20) continue;
+      // if (shop_item.random() * 30 > 20) return; // ghost deck
+      if (shop_rarity.random() > 0.7) continue;
+      if (shop_common.rand_item<Common>() != Common::Gros_Michel) continue;
+      has_michel = true;
+    }
+    if (!has_michel) return false;
+
+    bool has_cavendish = false;
+    for (int i = 0; i < 2; i++) {
+      if (shop_item.random() * 28 > 20) continue;
+      if (shop_rarity.random() > 0.7) continue;
+      if (shop_common.rand_item<Common>() != Common::Cavendish) continue;
+      has_cavendish = true;
+    }
+    if (!has_cavendish) return false;
+
+    shop_item = seed.init_rand(4, "cdt2");
+    shop_rarity = seed.init_rand(10, "rarity2sho");
+    shop_common = seed.init_rand(10, "Joker1sho2");
+    for (int i = 0; i < 2; i++) {
+      if (shop_item.random() * 28 > 20) continue;
+      if (shop_rarity.random() > 0.7) continue;
+      if (shop_common.rand_item<Common>() != Common::Cavendish) continue;
+      return true;
+    }
+
+    return false;
+}
+
 __global__ void search_seeds() {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int totalThreads = gridDim.x * blockDim.x;
@@ -34,7 +77,7 @@ __global__ void search_seeds() {
     long end_seed = total * (tid + 1) / totalThreads;
     Seed seed(start_seed);
     for (long i = start_seed; i < end_seed; i++) {
-        if (negative_bluestorm(seed)) {
+        if (ante1_cavendish(seed)) {
             printf("%s\n", seed.seed);
         }
         seed.next();
