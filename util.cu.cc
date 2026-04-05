@@ -67,11 +67,12 @@ __device__ PackType pack_type(Pack pack) {
 }
 
 __device__ int pack_size(Pack pack) {
+  bool big_packs = static_cast<int>(pack) < static_cast<int>(Pack::Buffoon_Normal);
   switch (static_cast<int>(pack) % 3) {
     case 0:
-      return 3;
+      return 2 + big_packs;
     default:
-      return 5;
+      return 4 + big_packs;
   }
 }
 
