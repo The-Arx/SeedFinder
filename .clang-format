@@ -1,0 +1,5 @@
+BasedOnStyle: Google
+BreakBeforeBraces: Attach
+IndentCaseLabels: true
+ReferenceAlignment: Right
+AllowShortBlocksOnASingleLine: Empty
