@@ -1,7 +1,9 @@
 #pragma once
 #include <cstdint>
 
-#define TW223_GEN(rs, z, i, k, q, s)                 \
+#include "cuda.h"
+
+#define TW223_GEN(rs, z, i, k, q, s)                    \
   z = rs[i];                                            \
   z = (((z << q) ^ z) >> (k - s)) ^                     \
       ((z & ((uint64_t)(int64_t)-1 << (64 - k))) << s); \

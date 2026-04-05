@@ -1,6 +1,8 @@
+#include <iostream>
+
 #include "items.h"
-#include "seed.cpp"
-#include "util.cpp"
+#include "seed.cu.cc"
+#include "util.cu.cc"
 
 void bluestorm_credit(const Seed &seed) {
   RandGen rarity_sho = seed.init_rand("rarity1sho");
@@ -19,11 +21,25 @@ void bluestorm_credit(const Seed &seed) {
   for (int i = 0; i < 2; i++) {
     if (rarity_buf.random() > 0.7) continue;  // uncommon or rare
     if (common_buf.rand_item<Common>() == Common::Credit_Card) {
-      std::cout << seed.to_string() << std::endl;
+      std::cout << seed.seed << std::endl;
       return;
     }
   }
   return;
+}
+
+std::string edition_str(Edition edition) {
+  switch (edition) {
+    case Edition::Foil: return "foil";
+    case Edition::Holographic: return "holographic";
+    case Edition::Polychrome: return "polychrome";
+    case Edition::Negative: return "negative";
+    default: return "none";
+  }
+}
+
+std::string edition_str(double edition) {
+  return edition_str(joker_edition_from_rand(edition));
 }
 
 void perkeo_blueprint(const Seed &seed) {
@@ -36,7 +52,7 @@ void perkeo_blueprint(const Seed &seed) {
   RandGen tag_rand = seed.init_rand("Tag1");
   Tag tag = tag_rand.rand_item<Tag>();
   for (int i = 2; !ante1_tag(tag); i++) {
-    tag = seed.init_rand("Tag1_resample" + std::to_string(i)).rand_item<Tag>();
+    tag = seed.init_rand("Tag1_resample", i).rand_item<Tag>();
   }
   if (tag != Tag::Charm) return;
   RandGen soul_rand = seed.init_rand("soul_Tarot1");
@@ -56,11 +72,13 @@ has_soul:
   }
   return;
 has_judgment:
-  double blueprint_edition = seed.init_rand("edijud1").random();
-  double perkeo_edition = seed.init_rand("edisou1").random();
+  RandGen jud_edition = seed.init_rand("edijud1");
+  Edition blueprint_edition = joker_edition_from_rand(jud_edition.random());
+  RandGen soul_edition = seed.init_rand("edisou1");
+  Edition perkeo_edition = joker_edition_from_rand(soul_edition.random());
   // if (blueprint_edition <= 0.96 && perkeo_edition <= 0.96) return;
   std::cout << edition_str(blueprint_edition) << " "
-            << edition_str(perkeo_edition) << " " << seed.to_string()
+            << edition_str(perkeo_edition) << " " << seed.seed
             << std::endl;
 }
 
@@ -102,7 +120,7 @@ void ante1_cavendish(const Seed &seed) {
   }
   if (!has_cavendish) return;
 
-  std::cout << seed << " " << edition_str(michel_edition) << " "
+  std::cout << seed.seed << " " << edition_str(michel_edition) << " "
             << edition_str(cavendish_edition) << std::endl;
 }
 
@@ -154,7 +172,7 @@ void card_search(const Seed &seed) {
                                  : Enhancement::None;
     if (matches[i] /* &&  card == Card::S_K  && polychrome */ && red_seal &&
         enhancment == Enhancement::Glass) {
-      std::cout << seed << std::endl;
+      std::cout << seed.seed << std::endl;
     }
   }
 }
@@ -162,6 +180,6 @@ void card_search(const Seed &seed) {
 void bugged_seeds(const Seed &seed) {
   RandGen rand = seed.init_rand("erratic");
   if (rand.is_bugged()) {
-    std::cout << seed << std::endl;
+    std::cout << seed.seed << std::endl;
   }
 }

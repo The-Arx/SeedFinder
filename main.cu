@@ -1,10 +1,10 @@
 #include <cstdio>
-#include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
 
 #include "items.h"
-#include "seed.cu"
-#include "util.cu"
+#include "seed.cu.cc"
+#include "util.cu.cc"
 
 __device__ bool find_negatives(const Seed &seed) {
     RandGen shop_edition = seed.init_rand("edisho1");
@@ -179,6 +179,18 @@ __device__ bool quad_soul(const Seed &seed) {
   return false;
 }
 
+__device__ bool erratic_regular(const Seed &seed) {
+  RandGen card_rand = seed.init_rand("erratic");
+  char cards[static_cast<int>(Rank::Count)] = {0};
+  for (int i = 0; i < 52; i++) {
+    Card card = card_rand.rand_item<Card>();
+    if (++cards[static_cast<int>(card_rank(card))] > 4) {
+      return false;
+    }
+  }
+  return true;
+}
+
 __global__ void search_seeds() {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int totalThreads = gridDim.x * blockDim.x;
@@ -187,7 +199,7 @@ __global__ void search_seeds() {
     long end_seed = total * (tid + 1) / totalThreads;
     Seed seed(start_seed);
     for (long i = start_seed; i < end_seed; i++) {
-        if (quad_soul(seed)) {
+        if (erratic_regular(seed)) {
             printf("%s\n", seed.seed);
         }
         seed.next();

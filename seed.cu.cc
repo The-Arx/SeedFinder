@@ -1,10 +1,16 @@
 #pragma once
-#include <cuda_runtime.h>
 #include <limits.h>
 #include <utility>
 
-#include "prng.cu"
-#include "pseudohash.cu"
+#ifndef __CUDACC__
+#include <string_view>
+#include <stdexcept>
+#include <format>
+#endif
+
+#include "cuda.h"
+#include "prng.cu.cc"
+#include "pseudohash.cu.cc"
 
 constexpr long pow_int(long a, int b) {
   long out = 1;
@@ -17,7 +23,7 @@ constexpr long pow_int(long a, int b) {
 }
 
 constexpr int SEED_LENGTH = 8;
-__constant__ char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+__constant__ constexpr char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
 constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
 
@@ -27,6 +33,7 @@ class RandGen {
   __device__ void skip();
   template <typename T>
   __device__ T rand_item();
+  __device__ bool is_bugged();
 
  private:
   double hashed_seed;
@@ -61,10 +68,17 @@ __device__ T RandGen::rand_item() {
       static_cast<int>(this->random() * static_cast<int>(T::Count)));
 }
 
+__device__ bool RandGen::is_bugged() {
+  return std::isnan(this->state);
+}
+
 class Seed {
  public:
   char seed[SEED_LENGTH + 1];
   __device__ Seed(long seed);
+#ifndef __CUDACC__
+  __device__ Seed(std::string_view seed_str);
+#endif
   template <typename... Args>
   __device__ RandGen init_rand(Args&& ...args) const;
   __device__ long to_long() const;
@@ -87,6 +101,25 @@ __device__ Seed::Seed(long seed_long) {
   seed[SEED_LENGTH] = '\0';
   partial_hash_seed(SEED_LENGTH - 1);
 }
+
+#ifndef __CUDACC__
+Seed::Seed(std::string_view seed_str) {
+  if (seed_str.size() != SEED_LENGTH) {
+    throw std::runtime_error(std::format("Seed must be exactly {}  characters (was {})", SEED_LENGTH, seed_str.size()));
+  }
+  for (int i = 0; i < SEED_LENGTH; i++) {
+    auto index = std::string_view(SEED_CHARS).find(seed_str[i]);
+    if (index == std::string_view::npos) {
+      throw std::runtime_error(std::format("Unexpected character {} in initial seed", seed_str[i]));
+    }
+    seed_num[i] = index;
+    seed[i] = seed_str[i];
+  }
+  hashed_seed[SEED_LENGTH] = 1.0;
+  seed[SEED_LENGTH] = '\0';
+  partial_hash_seed(SEED_LENGTH - 1);
+}
+#endif
 
 __device__ long Seed::to_long() const {
   long num = 0;

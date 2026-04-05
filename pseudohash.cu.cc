@@ -1,12 +1,19 @@
 #pragma once
-#include <cuda_runtime.h>
 #include <utility>
+#include <cstdlib>
+#include <climits>
+
+#include "cuda.h"
 
 constexpr double MATH_PI = 3.14159265358979323846;
 
 // x must be >= 0;
 __device__ double fast_mod_1(double x) {
+#ifdef __CUDACC__
   return x - trunc(x);
+#else
+  return (x - static_cast<long>(x)) * (x < LONG_MAX);
+#endif
 }
 
 __device__ double pseudohash_partial(int offset, int string_len, const char* string, double num) {

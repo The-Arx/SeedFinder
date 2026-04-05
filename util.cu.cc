@@ -2,6 +2,7 @@
 #include <numeric>
 #include <array>
 
+#include "cuda.h"
 #include "items.h"
 
 __device__ bool ante1_tag(Tag tag) {
@@ -21,6 +22,27 @@ __device__ bool ante1_tag(Tag tag) {
   }
 }
 
+__device__ Edition joker_edition_from_rand(double rand) {
+  if (rand <= 0.96) return Edition::None;
+  if (rand <= 0.98) return Edition::Foil;
+  if (rand <= 0.994) return Edition::Holographic;
+  if (rand <= 0.997) return Edition::Polychrome;
+  return Edition::Negative;
+}
+
+__device__ Edition card_edition_from_rand(double rand) {
+  if (rand <= 0.92) return Edition::None;
+  if (rand <= 0.94) return Edition::Foil;
+  if (rand <= 0.988) return Edition::Holographic;
+  return Edition::Polychrome;
+}
+
+__device__ Rarity rarity_from_rand(double rand) {
+  if (rand <= 0.7) return Rarity::Common;
+  if (rand <= 0.95) return Rarity::Uncommon;
+  return Rarity::Rare;
+}
+
 constexpr __constant__ double PACK_WEIGHTS[static_cast<int>(Pack::Count)] {
     4, 2, 0.5, 4, 2, 0.5, 0.6, 0.3, 0.07, 4, 2, 0.5, 1.2, 0.6, 0.15,
 };
@@ -38,12 +60,6 @@ __device__ Pack pack_from_rand(double rand) {
     }
   }
   return static_cast<Pack>(PACK_WEIGHTS_LEN - 1);
-}
-
-__device__ Rarity rarity_from_rand(double rand) {
-  if (rand <= 0.7) return Rarity::Common;
-  if (rand <= 0.95) return Rarity::Uncommon;
-  return Rarity::Rare;
 }
 
 __device__ PackType pack_type(Pack pack) {

@@ -3,7 +3,7 @@
 #include <string>
 
 #include "searchers.cpp"
-#include "seed.cpp"
+#include "seed.cu.cc"
 
 int main(int argc, char* argv[]) {
   std::string seed_str;

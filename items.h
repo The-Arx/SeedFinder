@@ -30,7 +30,7 @@ enum class Seal {
 };
 
 enum class Edition {
-  Base = -1,
+  None = -1,
   Foil,
   Holographic,
   Polychrome,
