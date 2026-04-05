@@ -44,7 +44,7 @@ __device__ Rarity rarity_from_rand(double rand) {
 }
 
 constexpr __constant__ double PACK_WEIGHTS[static_cast<int>(Pack::Count)] {
-    4, 2, 0.5, 4, 2, 0.5, 0.6, 0.3, 0.07, 4, 2, 0.5, 1.2, 0.6, 0.15,
+    4, 2, 0.5, 4, 2, 0.5, 4, 2, 0.5, 1.2, 0.6, 0.15, 0.6, 0.3, 0.07,
 };
 constexpr int PACK_WEIGHTS_LEN = sizeof(PACK_WEIGHTS) / sizeof(PACK_WEIGHTS[0]);
 constexpr double PACK_WEIGHT_TOTAL =
