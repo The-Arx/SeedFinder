@@ -5,7 +5,7 @@
 #ifndef __CUDACC__
 #include <string_view>
 #include <stdexcept>
-#include <format>
+#include <sstream>
 #endif
 
 #include "cuda.h"
@@ -105,12 +105,16 @@ __device__ Seed::Seed(long seed_long) {
 #ifndef __CUDACC__
 Seed::Seed(std::string_view seed_str) {
   if (seed_str.size() != SEED_LENGTH) {
-    throw std::runtime_error(std::format("Seed must be exactly {}  characters (was {})", SEED_LENGTH, seed_str.size()));
+    std::ostringstream oss;
+    oss << "Seed must be exactly " << SEED_LENGTH << " characters (was " << seed_str.size() << ")";
+    throw std::runtime_error(oss.str());
   }
   for (int i = 0; i < SEED_LENGTH; i++) {
     auto index = std::string_view(SEED_CHARS).find(seed_str[i]);
     if (index == std::string_view::npos) {
-      throw std::runtime_error(std::format("Unexpected character {} in initial seed", seed_str[i]));
+      std::ostringstream oss;
+      oss << "Unexpected character '" << seed_str[i] << "' in initial seed";
+      throw std::runtime_error(oss.str());
     }
     seed_num[i] = index;
     seed[i] = seed_str[i];
