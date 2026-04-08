@@ -23,7 +23,7 @@ int main(int argc, char* argv[]) {
   Seed seed(seed_str);
   // for (int i = 0; i < 10000000; i++) {
   while (true) {
-    card_search(seed);
+    royal_flush(seed);
     seed.next();
   }
   return 0;

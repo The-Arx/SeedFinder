@@ -20,8 +20,19 @@ typedef union {
   double d;
 } U64double;
 
-__device__ double first_rand(double seed) {
-  uint64_t rs[4];
+class PRNG {
+  public:
+    __device__ PRNG(double seed);
+    __device__ double random();
+    __device__ void skip();
+    template <typename T>
+    __device__ T rand_item();
+
+  private:
+    uint64_t rs[4];
+};
+
+__device__ PRNG::PRNG(double seed) {
   uint32_t r = 0x11090601; /* 64-k[i] as four 8 bit constants. */
   int i;
   for (i = 0; i < 4; i++) {
@@ -30,13 +41,27 @@ __device__ double first_rand(double seed) {
     r >>= 8;
     u.d = seed = seed * 3.14159265358979323846 + 2.7182818284590452354;
     if (u.u64 < m) u.u64 += m; /* Ensure k[i] MSB of u[i] are non-zero. */
-    rs[i] = u.u64;
+    this->rs[i] = u.u64;
   }
-  for (i = 0; i < 11; i++) {
-    uint64_t z;
-    TW223_STEP(rs, z)
+  for (i = 0; i < 10; i++) {
+    this->skip();
   }
+}
+
+__device__ double PRNG::random() {
+  this->skip();
   U64double u;
   u.u64 = ((rs[0] ^ rs[1] ^ rs[2] ^ rs[3]) & 0x000fffffffffffff) | 0x3ff0000000000000;
   return u.d - 1.0;
+}
+
+__device__ void PRNG::skip() {
+  uint64_t z;
+  TW223_STEP(this->rs, z)
+}
+
+template <typename T>
+__device__ T PRNG::rand_item() {
+  return static_cast<T>(
+      static_cast<int>(this->random() * static_cast<int>(T::Count)));
 }

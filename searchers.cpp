@@ -183,3 +183,11 @@ void bugged_seeds(const Seed &seed) {
     std::cout << seed.seed << std::endl;
   }
 }
+
+void royal_flush(const Seed &seed) {
+  PRNG shuffle = seed.init_rand("nr1").prng();
+  for (int i = 52; i > 52 - 8; i--) {
+    if (static_cast<int>(shuffle.random() * i) < 52 - 8) return;
+  }
+  std::cout << seed.seed << std::endl;
+}

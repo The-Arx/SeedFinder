@@ -22,17 +22,37 @@ constexpr long pow_int(long a, int b) {
   return out;
 }
 
+struct CharLookupTable {
+  char chars[256];
+  int char_index[256];
+  char operator[](char c) const { return chars[static_cast<unsigned char>(c)]; }
+};
+
 constexpr int SEED_LENGTH = 8;
 __constant__ constexpr char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
 constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
+__constant__ constexpr CharLookupTable SEED_NEXT_CHAR = [] () {
+  CharLookupTable table;
+  for (int i = 0; i < 256; i++) {
+    table.chars[i] = SEED_CHARS[0];
+    table.char_index[i] = 0;
+  }
+  for (int i = 0; i < SEED_CHARS_LENGTH; i++) {
+    unsigned char c = SEED_CHARS[i];
+    if (i < SEED_CHARS_LENGTH - 1) table.chars[c] = SEED_CHARS[i + 1];
+    table.char_index[c] = i;
+  }
+  return table;
+}();
 
 class RandGen {
  public:
   __device__ double random();
-  __device__ void skip();
   template <typename T>
   __device__ T rand_item();
+  __device__ void skip();
+  __device__ PRNG prng();
   __device__ bool is_bugged();
 
  private:
@@ -44,6 +64,10 @@ class RandGen {
   friend class Seed;
 };
 
+__device__ PRNG RandGen::prng() {
+  return PRNG(this->pseudoseed());
+}
+
 __device__ RandGen::RandGen(double hashed_seed, double state) {
   this->hashed_seed = hashed_seed;
   this->state = state;
@@ -51,8 +75,7 @@ __device__ RandGen::RandGen(double hashed_seed, double state) {
 
 __device__ double RandGen::pseudoseed() {
   this->state = round(
-    fast_mod_1(2.134453429141 + this->state * 1.72431234)
-    * pow(10.0, 13.0)) / pow(10.0, 13.0);
+    fast_mod_1(2.134453429141 + this->state * 1.72431234) * 1e13) / 1e13;
   return (this->state + hashed_seed) / 2.0;
 }
 
@@ -60,7 +83,10 @@ __device__ void RandGen::skip() {
   this->pseudoseed();
 }
 
-__device__ double RandGen::random() { return first_rand(this->pseudoseed()); }
+__device__ double RandGen::random() {
+  PRNG prng(this->pseudoseed());
+  return prng.random();
+}
 
 template <typename T>
 __device__ T RandGen::rand_item() {
@@ -76,6 +102,7 @@ class Seed {
  public:
   char seed[SEED_LENGTH + 1];
   __device__ Seed(long seed);
+  __device__ Seed(const char* seed_str);
 #ifndef __CUDACC__
   __device__ Seed(std::string_view seed_str);
 #endif
@@ -85,7 +112,6 @@ class Seed {
   __device__ void next();
 
  private:
-  unsigned int seed_num[SEED_LENGTH];
   double hashed_seed[SEED_LENGTH + 1];
   __device__ void partial_hash_seed(int start);
 };
@@ -94,7 +120,6 @@ __device__ Seed::Seed(long seed_long) {
   for (int i = 0; i < SEED_LENGTH; i++) {
     int index = seed_long % SEED_CHARS_LENGTH;
     seed_long /= SEED_CHARS_LENGTH;
-    seed_num[i] = index;
     seed[i] = SEED_CHARS[index];
   }
   hashed_seed[SEED_LENGTH] = 1.0;
@@ -110,13 +135,12 @@ Seed::Seed(std::string_view seed_str) {
     throw std::runtime_error(oss.str());
   }
   for (int i = 0; i < SEED_LENGTH; i++) {
-    auto index = std::string_view(SEED_CHARS).find(seed_str[i]);
-    if (index == std::string_view::npos) {
-      std::ostringstream oss;
-      oss << "Unexpected character '" << seed_str[i] << "' in initial seed";
-      throw std::runtime_error(oss.str());
-    }
-    seed_num[i] = index;
+    // auto index = std::string_view(SEED_CHARS).find(seed_str[i]);
+    // if (index == std::string_view::npos) {
+    //   std::ostringstream oss;
+    //   oss << "Unexpected character '" << seed_str[i] << "' in initial seed";
+    //   throw std::runtime_error(oss.str());
+    // }
     seed[i] = seed_str[i];
   }
   hashed_seed[SEED_LENGTH] = 1.0;
@@ -125,11 +149,20 @@ Seed::Seed(std::string_view seed_str) {
 }
 #endif
 
+Seed::Seed(const char* seed_str) {
+  for (int i = 0; i < SEED_LENGTH; i++) {
+    seed[i] = seed_str[i];
+  }
+  hashed_seed[SEED_LENGTH] = 1.0;
+  seed[SEED_LENGTH] = '\0';
+  partial_hash_seed(SEED_LENGTH - 1);
+}
+
 __device__ long Seed::to_long() const {
   long num = 0;
   for (int i = SEED_LENGTH - 1; i >= 0; i--) {
     num *= SEED_CHARS_LENGTH;
-    num += seed_num[i];
+    num += SEED_NEXT_CHAR.char_index[static_cast<unsigned char>(seed[i])];
   }
   return num;
 }
@@ -145,13 +178,11 @@ __device__ void Seed::partial_hash_seed(int start) {
 
 __device__ void Seed::next() {
   for (int i = 0; i < 8; i++) {
-    seed_num[i] += 1;
-    if (seed_num[i] != SEED_CHARS_LENGTH) {
-      seed[i] = SEED_CHARS[seed_num[i]];
+    seed[i] = SEED_NEXT_CHAR[seed[i]];
+    if (seed[i] != SEED_CHARS[0]) {
       partial_hash_seed(i);
       break;
     }
-    seed_num[i] = 0;
     seed[i] = SEED_CHARS[0];
   }
 }
