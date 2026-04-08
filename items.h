@@ -41,9 +41,9 @@ enum class Edition {
 enum class PackType {
   Arcana,
   Celestial,
-  Spectral,
   Standard,
   Buffoon,
+  Spectral,
   Count
 };
 
@@ -54,15 +54,15 @@ enum class Pack {
   Celestial_Normal,
   Celestial_Jumbo,
   Celestial_Mega,
-  Spectral_Normal,
-  Spectral_Jumbo,
-  Spectral_Mega,
   Standard_Normal,
   Standard_Jumbo,
   Standard_Mega,
   Buffoon_Normal,
   Buffoon_Jumbo,
   Buffoon_Mega,
+  Spectral_Normal,
+  Spectral_Jumbo,
+  Spectral_Mega,
   Count,
 };
 
