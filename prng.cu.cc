@@ -25,8 +25,6 @@ class PRNG {
     __device__ PRNG(double seed);
     __device__ double random();
     __device__ void skip();
-    template <typename T>
-    __device__ T rand_item();
 
   private:
     uint64_t rs[4];
@@ -58,10 +56,4 @@ __device__ double PRNG::random() {
 __device__ void PRNG::skip() {
   uint64_t z;
   TW223_STEP(this->rs, z)
-}
-
-template <typename T>
-__device__ T PRNG::rand_item() {
-  return static_cast<T>(
-      static_cast<int>(this->random() * static_cast<int>(T::Count)));
 }

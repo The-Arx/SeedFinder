@@ -302,26 +302,26 @@ enum class Voucher {
 };
 
 enum class Spectral {
-    Familiar,
-    Grim,
-    Incantation,
-    Talisman,
-    Aura,
-    Wraith,
-    Sigil,
-    Ouija,
-    Ectoplasm,
-    Immolate,
-    Ankh,
-    Deja_Vu,
-    Hex,
-    Trance,
-    Medium,
-    Cryptid,
-    // Always retry
-    Soul,
-    Black_Hole,
-    Count
+  Familiar,
+  Grim,
+  Incantation,
+  Talisman,
+  Aura,
+  Wraith,
+  Sigil,
+  Ouija,
+  Ectoplasm,
+  Immolate,
+  Ankh,
+  Deja_Vu,
+  Hex,
+  Trance,
+  Medium,
+  Cryptid,
+  // Always retry
+  Soul,
+  Black_Hole,
+  Count
 };
 
 enum class Common {
