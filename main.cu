@@ -1,6 +1,5 @@
 #include <cstdio>
-#include <cuda_runtime_api.h>
-#include <device_launch_parameters.h>
+#include <cuda_runtime.h>
 
 #include "items.h"
 #include "seed.cu.cc"
@@ -207,7 +206,7 @@ __global__ void search_seeds() {
 }
 
 int main() {
-    search_seeds<<<1024,256>>>();
+    search_seeds<<<256,256>>>();
 
     cudaError_t err = cudaGetLastError();
     if (err != cudaSuccess) {

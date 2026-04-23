@@ -195,3 +195,155 @@ __device__ void erratic_regular(const Seed &seed) {
   }
   std::cout << seed.seed << std::endl;
 }
+
+void royal_flush(const Seed &seed) {
+  PRNG shuffle = seed.init_rand("nr1").prng();
+  for (int i = 52; i > 52 - 8; i--) {
+    if (static_cast<int>(shuffle.random() * i) < 52 - 8) return;
+  }
+  std::cout << seed.seed << std::endl;
+}
+
+bool check_shuffle(RandGen shuffle, bool cards[]) {
+  for (int n = 52; n > 52 - 8; n--) {
+    int index = shuffle.random() * n;
+    if (!cards[index]) return false;
+    cards[index] = cards[n - 1];
+  }
+  return true;
+}
+
+void dna_glass(const Seed &seed) {
+  RandGen pack_rand = seed.init_rand("shop_pack1");
+  if (pack_from_rand(pack_rand.random()) != Pack::Standard_Normal) return;
+
+  std::array<bool, 3> matches;
+  int largest_card_match = -1;
+  RandGen edition_rand = seed.init_rand("standard_edition1");
+  for (int i = 0; i < 3; i++) {
+    matches[i] = edition_rand.random() > 1 - 0.006 * 2;
+    if (matches[i]) {
+      largest_card_match = i;
+    }
+  }
+  if (largest_card_match < 0) return;
+
+  int largest_edition_match = -1;
+  RandGen card_rand = seed.init_rand("frontsta1");
+  for (int i = 0; i <= largest_card_match; i++) {
+    Card card = card_rand.rand_item<Card>();
+    if (matches[i]) {
+      if (card_rank(card) == Rank::King) {
+        largest_edition_match = i;
+      } else {
+        matches[i] = false;
+      }
+    }
+  }
+  if (largest_edition_match < 0) return;
+
+
+  // RandGen card_rand = seed.init_rand("frontsta1");
+  // RandGen edition_rand = seed.init_rand("standard_edition1");
+  RandGen has_enhancment_rand = seed.init_rand("stdset1");
+  RandGen enhancment_rand = seed.init_rand("Enhancedsta1");
+  RandGen has_seal_rand = seed.init_rand("stdseal1");
+  RandGen seal_type_rand = seed.init_rand("stdsealtype1");
+  for (int i = 0; i <= largest_edition_match; i++) {
+    // Card card = card_rand.rand_item<Card>();
+    // bool polychrome = edition_rand.random() > 1 - 0.006 * 2;
+    bool red_seal =
+        has_seal_rand.random() > 1 - 0.02 * 10 && seal_type_rand.random() > 0.75;
+    Enhancement enhancment = has_enhancment_rand.random() > 0.6
+                                 ? enhancment_rand.rand_item<Enhancement>()
+                                 : Enhancement::None;
+    if (matches[i] /* &&  card == Card::S_K  && polychrome */ && red_seal &&
+        enhancment == Enhancement::Glass) {
+      goto has_card;
+    }
+  }
+  return;
+  has_card:
+
+  RandGen rarity_buf = seed.init_rand("rarity1buf");
+  RandGen rare_buf = seed.init_rand("Joker3buf1");
+  // check both slots in buffoon pack
+  for (int i = 0; i < 2; i++) {
+    if (rarity_buf.random() <= 0.95) continue;
+    if (rare_buf.rand_item<Rare>() == Rare::DNA) {
+      std::cout << seed.seed << std::endl;
+      return;
+    }
+  }
+}
+
+void round2_score(const Seed &seed) {
+  RandGen pack_rand = seed.init_rand("shop_pack1");
+  if (pack_from_rand(pack_rand.random()) != Pack::Spectral_Mega) return;
+  
+  RandGen soul_rand = seed.init_rand("soul_Spectral1");
+  for (int i = 0; i < 4; i++) {
+    if (soul_rand.random() > 0.997) {
+      goto has_soul;
+    }
+    soul_rand.skip();
+  }
+  return;
+has_soul:
+
+  RandGen legendary = seed.init_rand("Joker4");
+  if (legendary.rand_item<Legendary>() != Legendary::Triboulet) return;
+
+  RandGen arcana_tarot = seed.init_rand("Spectralspe1");
+  for (int i = 0; i < 3; i++) {
+    if (arcana_tarot.rand_item<Spectral>() == Spectral::Immolate) {
+      goto has_immolate;
+    }
+  }
+  return;
+has_immolate:
+
+  RandGen rarity_buf = seed.init_rand("rarity1buf");
+  RandGen rare_buf = seed.init_rand("Joker3buf1");
+  for (int i = 0; i < 2; i++) {
+    if (rarity_buf.random() <= 0.95) continue;
+    switch (rare_buf.rand_item<Rare>()) {
+      case Rare::Blueprint:
+      case Rare::Brainstorm:
+        goto has_copy;
+      default:
+        break;
+    }
+  }
+  return;
+has_copy:
+
+  bool has_dusk = false;
+  bool has_sock = false;
+  bool has_seltzer = false;
+
+  RandGen shop_item = seed.init_rand("cdt1");
+  RandGen shop_rarity = seed.init_rand("rarity1sho");
+  RandGen shop_uncommon = seed.init_rand("Joker2sho1");
+  for (int i = 0; i < 4; i++) {
+    if (shop_item.random() * 28 > 20) continue;
+    if (rarity_from_rand(shop_rarity.random()) != Rarity::Uncommon) continue;
+    switch (shop_uncommon.rand_item<Uncommon>()) {
+      case Uncommon::Dusk:
+        has_dusk = true;
+        break;
+      case Uncommon::Sock_and_Buskin:
+        has_sock = true;
+        break;
+      case Uncommon::Seltzer:
+        has_seltzer = true;
+        break;
+      default:
+        break;
+    }
+  }
+
+  if (has_dusk + has_sock + has_seltzer < 2) return;
+
+  std::cout << seed.seed << std::endl;
+}
