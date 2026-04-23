@@ -52,7 +52,7 @@ __device__ RandGen::RandGen(double hashed_seed, double state) {
 __device__ double RandGen::pseudoseed() {
   this->state = round(
     fast_mod_1(2.134453429141 + this->state * 1.72431234)
-    * pow(10.0, 13.0)) / pow(10.0, 13.0);
+    * 1e13) / 1e13;
   return (this->state + hashed_seed) / 2.0;
 }
 
@@ -69,7 +69,7 @@ __device__ T RandGen::rand_item() {
 }
 
 __device__ bool RandGen::is_bugged() {
-  return std::isnan(this->state);
+  return isnan(this->state);
 }
 
 class Seed {
