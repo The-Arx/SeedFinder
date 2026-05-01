@@ -22,16 +22,16 @@ constexpr long pow_int(long a, int b) {
   return out;
 }
 
+constexpr int SEED_LENGTH = 8;
+__constant__ constexpr char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
+constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
+
 struct CharLookupTable {
   char chars[256];
   int char_index[256];
   char operator[](char c) const { return chars[static_cast<unsigned char>(c)]; }
 };
-
-constexpr int SEED_LENGTH = 8;
-__constant__ constexpr char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
-constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
 __constant__ constexpr CharLookupTable SEED_NEXT_CHAR = [] () {
   CharLookupTable table;
   for (int i = 0; i < 256; i++) {
@@ -177,7 +177,7 @@ __device__ void Seed::partial_hash_seed(int start) {
 }
 
 __device__ void Seed::next() {
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < SEED_LENGTH; i++) {
     seed[i] = SEED_NEXT_CHAR[seed[i]];
     if (seed[i] != SEED_CHARS[0]) {
       partial_hash_seed(i);

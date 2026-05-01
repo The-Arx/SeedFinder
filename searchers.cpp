@@ -335,3 +335,46 @@ has_copy:
 
   std::cout << seed.seed << std::endl;
 }
+
+int num_souls(RandGen &rand, bool spectral, int count) {
+  int souls = 0;
+  for (int i = 0; i < count; i++) {
+    if (rand.random() > 0.997) {
+      souls++;
+      continue;
+    }
+    if (spectral) rand.skip(); // black hole check
+  }
+  return souls;
+}
+
+void legendaries(const Seed &seed) {
+  int souls = 0;
+  for (int ante = 1; ante <= 8; ante++) {
+    int spectrals = 0;
+    int tarots = 0;
+    RandGen pack_rand = seed.init_rand("shop_pack", ante);
+    for (int i = ante == 1 ? 3 : 0; i < 6; i++) {
+      Pack pack = pack_from_rand(pack_rand.random());
+      switch(pack_type(pack)) {
+        case PackType::Spectral:
+          spectrals += pack_size(pack);
+          break;
+        case PackType::Arcana:
+          tarots += pack_size(pack);
+          break;
+        default:
+          break;
+      }
+    }
+
+    RandGen soulTarot = seed.init_rand("soul_Tarot", ante);
+    souls += num_souls(soulTarot, false, tarots);
+
+    RandGen soulSpectral = seed.init_rand("soul_Spectral", ante);
+    souls += num_souls(soulSpectral, true, spectrals);
+  }
+  if (souls >= 4) {
+    std::cout << seed.seed << ": " << souls << std::endl;
+  }
+}
