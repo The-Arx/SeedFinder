@@ -6,7 +6,7 @@
 #define __device__
 
 #include <cmath>
-using std::pow;
 using std::round;
+using std::isnan;
 
 #endif

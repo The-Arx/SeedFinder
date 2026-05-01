@@ -95,7 +95,7 @@ __device__ T RandGen::rand_item() {
 }
 
 __device__ bool RandGen::is_bugged() {
-  return std::isnan(this->state);
+  return isnan(this->state);
 }
 
 class Seed {

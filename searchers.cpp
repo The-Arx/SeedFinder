@@ -184,6 +184,18 @@ void bugged_seeds(const Seed &seed) {
   }
 }
 
+__device__ void erratic_regular(const Seed &seed) {
+  RandGen card_rand = seed.init_rand("erratic");
+  char ranks[static_cast<int>(Rank::Count)] = {};
+  char suits[static_cast<int>(Suit::Count)] = {};
+  for (int i = 0; i < 52; i++) {
+    Card card = card_rand.rand_item<Card>();
+    if (++ranks[static_cast<int>(card_rank(card))] > 4) return;
+    if (++suits[static_cast<int>(card_suit(card))] > 13) return;
+  }
+  std::cout << seed.seed << std::endl;
+}
+
 void royal_flush(const Seed &seed) {
   PRNG shuffle = seed.init_rand("nr1").prng();
   for (int i = 52; i > 52 - 8; i--) {
