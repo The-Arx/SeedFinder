@@ -22,16 +22,16 @@ constexpr long pow_int(long a, int b) {
   return out;
 }
 
-struct CharLookupTable {
-  char chars[256];
-  int char_index[256];
-};
-
 constexpr int SEED_LENGTH = 8;
 __constant__ constexpr char SEED_CHARS[] = "123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 constexpr int SEED_CHARS_LENGTH = sizeof(SEED_CHARS) - 1;
 constexpr long NUM_SEEDS = pow_int(SEED_CHARS_LENGTH, SEED_LENGTH);
-__constant__ constexpr CharLookupTable SEED_NEXT_CHAR = [] () {
+
+struct CharLookupTable {
+  char chars[256];
+  int char_index[256];
+};
+__constant__ constexpr CharLookupTable SEED_CHAR_LOOKUP = [] () {
   CharLookupTable table;
   for (int i = 0; i < 256; i++) {
     table.chars[i] = SEED_CHARS[0];
@@ -161,7 +161,7 @@ __device__ long Seed::to_long() const {
   long num = 0;
   for (int i = SEED_LENGTH - 1; i >= 0; i--) {
     num *= SEED_CHARS_LENGTH;
-    num += SEED_NEXT_CHAR.char_index[static_cast<unsigned char>(seed[i])];
+    num += SEED_CHAR_LOOKUP.char_index[static_cast<unsigned char>(seed[i])];
   }
   return num;
 }
@@ -176,8 +176,8 @@ __device__ void Seed::partial_hash_seed(int start) {
 }
 
 __device__ void Seed::next() {
-  for (int i = 0; i < 8; i++) {
-    seed[i] = SEED_NEXT_CHAR.chars[seed[i]];
+  for (int i = 0; i < SEED_LENGTH; i++) {
+    seed[i] = SEED_CHAR_LOOKUP.chars[seed[i]];
     if (seed[i] != SEED_CHARS[0]) {
       partial_hash_seed(i);
       break;
