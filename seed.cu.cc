@@ -25,7 +25,6 @@ constexpr long pow_int(long a, int b) {
 struct CharLookupTable {
   char chars[256];
   int char_index[256];
-  char operator[](char c) const { return chars[static_cast<unsigned char>(c)]; }
 };
 
 constexpr int SEED_LENGTH = 8;
@@ -149,7 +148,7 @@ Seed::Seed(std::string_view seed_str) {
 }
 #endif
 
-Seed::Seed(const char* seed_str) {
+__device__ Seed::Seed(const char* seed_str) {
   for (int i = 0; i < SEED_LENGTH; i++) {
     seed[i] = seed_str[i];
   }
@@ -178,7 +177,7 @@ __device__ void Seed::partial_hash_seed(int start) {
 
 __device__ void Seed::next() {
   for (int i = 0; i < 8; i++) {
-    seed[i] = SEED_NEXT_CHAR[seed[i]];
+    seed[i] = SEED_NEXT_CHAR.chars[seed[i]];
     if (seed[i] != SEED_CHARS[0]) {
       partial_hash_seed(i);
       break;
