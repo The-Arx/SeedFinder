@@ -23,8 +23,9 @@ typedef union {
 class PRNG {
   public:
     __device__ PRNG(double seed);
-    __device__ double random();
     __device__ void skip();
+    __device__ double random();
+    __device__ uint32_t rand_int(uint32_t max);
 
   private:
     uint64_t rs[4];
@@ -46,6 +47,11 @@ __device__ PRNG::PRNG(double seed) {
   }
 }
 
+__device__ void PRNG::skip() {
+  uint64_t z;
+  TW223_STEP(this->rs, z)
+}
+
 __device__ double PRNG::random() {
   this->skip();
   U64double u;
@@ -53,7 +59,7 @@ __device__ double PRNG::random() {
   return u.d - 1.0;
 }
 
-__device__ void PRNG::skip() {
-  uint64_t z;
-  TW223_STEP(this->rs, z)
+__device__ uint32_t PRNG::rand_int(uint32_t max) {
+  this->skip();
+  return ((rs[0] ^ rs[1] ^ rs[2] ^ rs[3]) & 0x000fffffffffffff) * max / 0x000fffffffffffff;
 }

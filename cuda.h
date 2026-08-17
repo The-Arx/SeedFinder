@@ -4,6 +4,7 @@
 
 #define __constant__
 #define __device__
+#define __host__
 
 #include <cmath>
 using std::round;
